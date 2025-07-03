@@ -1,0 +1,5 @@
+django
+django-erp-framework
+crispy-bootstrap4
+whitenoise
+gunicorn

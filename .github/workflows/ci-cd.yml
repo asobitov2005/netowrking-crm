@@ -1,0 +1,30 @@
+name: CI/CD Django with Docker
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-deploy:
+    runs-on: self-hosted
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Build Docker image
+      run: docker build -t myapp:latest .
+
+    - name: Create Docker volume if not exists
+      run: docker volume create myapp_data || true
+
+    - name: Run Docker container with volume for SQLite
+      run: |
+        docker stop myapp-container || true
+        docker rm myapp-container || true
+        docker run -d -p 8008:8008 \
+          -v myapp_data:/app \
+          --name myapp-container myapp:latest
+
+    - name: Run Django migrations
+      run: docker exec myapp-container python manage.py migrate
